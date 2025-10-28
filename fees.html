@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Charges Area Chart Dashboard</title>
+  <title>Charges Forecast Dashboard</title>
 
   <!-- Chart.js + Date Adapter -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -11,19 +11,19 @@
 
   <style>
     :root {
-      --pink-bg: #FFF0F5;
-      --panel-bg: rgba(255, 255, 255, 0.9);
+      --bg: #FFF0F5;
+      --panel: rgba(255, 255, 255, 0.94);
       --hot-pink: #FF1493;
-      --soft-pink: #FFB6C1;
-      --deep-pink: #FF69B4;
+      --soft-grey: #95A5A6;
+      --grey-fill: rgba(149, 165, 166, 0.15);
       --text: #2d1b3d;
-      --grid: rgba(0,0,0,0.1);
+      --grid: rgba(0,0,0,0.07);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--pink-bg) url('https://static.vecteezy.com/system/resources/previews/051/865/495/non_2x/branch-with-cherry-blossoms-on-a-transparent-background-free-png.png') center/cover no-repeat fixed;
+      background: var(--bg) url('https://static.vecteezy.com/system/resources/previews/051/865/495/non_2x/branch-with-cherry-blossoms-on-a-transparent-background-free-png.png') center/cover fixed;
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -37,28 +37,28 @@
     }
 
     .sidebar {
-      width: 350px;
-      background: var(--panel-bg);
+      width: 380px;
+      background: var(--panel);
       padding: 1.5rem;
       border-right: 1px solid #eee;
       overflow-y: auto;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06);
     }
 
     .chart-container {
       flex: 1;
       padding: 1.5rem;
-      background: var(--panel-bg);
+      background: var(--panel);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
     }
 
     .chart-wrapper {
       position: relative;
       width: 100%;
       height: 100%;
-      max-height: 80vh;
+      max-height: 82vh;
     }
 
     h1 {
@@ -74,8 +74,8 @@
 
     summary {
       cursor: pointer;
-      padding: 0.75rem 1rem;
-      background: var(--soft-pink);
+      padding: 0.8rem 1rem;
+      background: #FFB6C1;
       border-radius: 8px;
       font-weight: 600;
       color: var(--text);
@@ -86,52 +86,75 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
     }
 
     th, td {
-      padding: 0.6rem;
+      padding: 0.65rem;
       text-align: left;
       border-bottom: 1px solid #eee;
     }
 
     th {
-      background: var(--soft-pink);
+      background: #FFB6C1;
       font-weight: 600;
       color: var(--text);
     }
 
-    input {
+    input[type="date"] {
       width: 100%;
-      padding: 0.4rem;
+      padding: 0.45rem;
       border: 1px solid #ddd;
       border-radius: 6px;
+      font-family: 'Courier New', monospace;
       font-size: 0.9rem;
-      transition: border 0.2s;
+      color: #444;
     }
 
-    input:focus {
+    input[type="date"]:focus {
       outline: none;
       border-color: var(--hot-pink);
       box-shadow: 0 0 0 2px rgba(255,20,147,0.2);
     }
 
-    /* Responsive */
+    .charge-input {
+      width: 66% !important;
+      padding: 0.45rem 0.45rem 0.45rem 1.9rem !important;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ctext x='1' y='12' font-family='Arial' font-size='13' fill='%23666'%3E£%3C/text%3E%3C/svg%3E") no-repeat 0.6rem center;
+      background-size: 1.1rem;
+    }
+
+    .charge-input:focus {
+      outline: none;
+      border-color: var(--hot-pink);
+      box-shadow: 0 0 0 2px rgba(255,20,147,0.2);
+    }
+
+    .add-row {
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      background: var(--hot-pink);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+
+    .add-row:hover {
+      background: #e6007e;
+    }
+
     @media (max-width: 768px) {
-      .dashboard {
-        flex-direction: column;
-      }
-      .sidebar, .chart-container {
-        width: 100%;
-      }
-      .sidebar {
-        max-height: 50vh;
-        order: 2;
-      }
-      .chart-container {
-        height: 50vh;
-        order: 1;
-      }
+      .dashboard { flex-direction: column; }
+      .sidebar, .chart-container { width: 100%; }
+      .sidebar { max-height: 55vh; order: 2; }
+      .chart-container { height: 45vh; order: 1; }
     }
 
     @media (max-width: 768px) and (orientation: landscape) {
@@ -143,7 +166,6 @@
 <body>
 
 <div class="dashboard">
-  <!-- Sidebar: Editable Table -->
   <aside class="sidebar">
     <h1>Edit Charges</h1>
     <details open id="table-details">
@@ -157,22 +179,22 @@
         </thead>
         <tbody id="data-table"></tbody>
       </table>
+      <button class="add-row" onclick="addNewRow()">+ Add New Month</button>
     </details>
   </aside>
 
-  <!-- Main: Area Chart -->
   <main class="chart-container">
     <div class="chart-wrapper">
-      <canvas id="areaChart"></canvas>
+      <canvas id="forecastChart"></canvas>
     </div>
   </main>
 </div>
 
 <script>
   // ==================================================================
-  // 1. DATA STORE
+  // 1. DATA
   // ==================================================================
-  let chargesData = [
+  let actualData = [
     { date: '2025-01-01', charge: 37 },
     { date: '2025-02-01', charge: 35 },
     { date: '2025-03-01', charge: 28 },
@@ -186,141 +208,176 @@
   ];
 
   // ==================================================================
-  // 2. RENDER TABLE
+  // 2. PREDICTION: EXACT LOGIC YOU REQUESTED
+  // ==================================================================
+  function predictNext6() {
+    const sorted = [...actualData].sort((a,b) => new Date(a.date) - new Date(b.date));
+    if (sorted.length < 3) return [];
+
+    // Last 3 values
+    const last3 = sorted.slice(-3);
+    const diff1 = last3[1].charge - last3[0].charge;
+    const diff2 = last3[2].charge - last3[1].charge;
+    const avgDecrease = (diff1 + diff2) / 2;  // This is the key: average of two drops
+
+    const lastDate = new Date(sorted[sorted.length - 1].date);
+    const lastValue = sorted[sorted.length - 1].charge;
+    const predictions = [];
+    let current = lastValue;
+
+    for (let i = 1; i <= 6; i++) {
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(lastDate.getMonth() + i);
+      const variance = (Math.random() - 0.5) * 0.1;  // ±5%
+      const delta = avgDecrease * (1 + variance);
+      current += delta;
+      current = Math.max(0, current);
+      predictions.push({
+        date: nextDate.toISOString().slice(0, 10),
+        charge: Math.round(current * 100) / 100
+      });
+    }
+    return predictions;
+  }
+
+  // ==================================================================
+  // 3. TABLE RENDER + ADD ROW
   // ==================================================================
   const tableBody = document.getElementById('data-table');
 
   function renderTable() {
     tableBody.innerHTML = '';
-    chargesData.forEach((item, index) => {
+    actualData.forEach((item, i) => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td><input type="date" value="${item.date}" onchange="updateRow(${index}, 'date', this.value)"></td>
-        <td><input type="number" min="0" step="0.1" value="${item.charge}" onchange="updateRow(${index}, 'charge', this.value)"></td>
+        <td><input type="date" value="${item.date}" onchange="updateRow(${i}, 'date', this.value)"></td>
+        <td><input type="number" class="charge-input" min="0" step="0.1" value="${item.charge}" onchange="updateRow(${i}, 'charge', this.value)"></td>
       `;
       tableBody.appendChild(row);
     });
   }
 
-  // Global update function
-  window.updateRow = (index, field, value) => {
+  window.updateRow = (i, field, value) => {
     if (field === 'charge') {
-      chargesData[index][field] = parseFloat(value) || 0;
+      actualData[i][field] = parseFloat(value) || 0;
     } else {
-      chargesData[index][field] = value;
+      actualData[i][field] = value;
     }
-    renderChart(); // Live update
+    renderChart();
+  };
+
+  window.addNewRow = () => {
+    const lastDate = new Date(actualData[actualData.length - 1].date);
+    const nextMonth = new Date(lastDate);
+    nextMonth.setMonth(lastDate.getMonth() + 1);
+    actualData.push({
+      date: nextMonth.toISOString().slice(0, 10),
+      charge: 0
+    });
+    renderTable();
+    renderChart();
   };
 
   // ==================================================================
-  // 3. AREA CHART – FLAWLESS RENDERING
+  // 4. CHART: ACTUAL + GREY AREA FILL
   // ==================================================================
-  let areaChart = null;
+  let chart = null;
 
   function renderChart() {
-    const ctx = document.getElementById('areaChart').getContext('2d');
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    const sortedActual = [...actualData].sort((a,b) => new Date(a.date) - new Date(b.date));
+    const predicted = predictNext6();
 
-    // Sort by date
-    const sortedData = [...chargesData].sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Full timeline
+    const allDates = [...sortedActual.map(d => ({ date: d.date, charge: d.charge })), ...predicted];
+    const actualValues = sortedActual.map(d => d.charge);
+    const lastValue = sortedActual[sortedActual.length - 1].charge;
+    const predictedValues = Array(sortedActual.length - 1).fill(null).concat([lastValue, ...predicted.map(p => p.charge)]);
 
-    // Destroy previous chart
-    if (areaChart) {
-      areaChart.destroy();
-    }
+    // Gradient for actual (pink)
+    const pinkGradient = ctx.createLinearGradient(0, 0, 0, 450);
+    pinkGradient.addColorStop(0, 'rgba(255, 20, 147, 0.35)');
+    pinkGradient.addColorStop(1, 'rgba(255, 20, 147, 0.05)');
 
-    // Create gradient fill
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(255, 20, 147, 0.3)');
-    gradient.addColorStop(1, 'rgba(255, 20, 147, 0.05)');
+    // Gradient for prediction (soft grey)
+    const greyGradient = ctx.createLinearGradient(0, 0, 0, 450);
+    greyGradient.addColorStop(0, 'rgba(149, 165, 166, 0.25)');
+    greyGradient.addColorStop(1, 'rgba(149, 165, 166, 0.05)');
 
-    // Create chart
-    areaChart = new Chart(ctx, {
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: sortedData.map(d => d.date),
-        datasets: [{
-          label: 'Monthly Charges',
-          data: sortedData.map(d => d.charge),
-          fill: true,
-          backgroundColor: gradient,
-          borderColor: '#FF1493',
-          borderWidth: 3,
-          pointBackgroundColor: '#FF1493',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 3,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          tension: 0.4,
-          shadowOffsetX: 0,
-          shadowOffsetY: 4,
-          shadowBlur: 10,
-          shadowColor: 'rgba(255, 20, 147, 0.3)'
-        }]
+        labels: allDates.map(d => d.date),
+        datasets: [
+          {
+            label: 'Actual Charges',
+            data: actualValues,
+            fill: true,
+            backgroundColor: pinkGradient,
+            borderColor: '#FF1493',
+            borderWidth: 3,
+            pointBackgroundColor: '#FF1493',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.4
+          },
+          {
+            label: 'Predicted (Next 6 Months)',
+            data: predictedValues,
+            fill: true,
+            backgroundColor: greyGradient,
+            borderColor: '#95A5A6',
+            borderWidth: 2,
+            borderDash: [8, 4],
+            pointBackgroundColor: '#95A5A6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.3
+          }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: {
-          duration: 1200,
-          easing: 'easeOutQuart'
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
+        animation: { duration: 1100, easing: 'easeOutQuart' },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
-            display: true,
             position: 'top',
             labels: {
-              font: { size: 14, weight: '600' },
-              color: '#FF1493',
-              padding: 20
+              font: { size: 13, weight: '600' },
+              padding: 20,
+              usePointStyle: true
             }
           },
           tooltip: {
-            backgroundColor: 'rgba(45, 27, 61, 0.9)',
+            backgroundColor: 'rgba(45, 27, 61, 0.92)',
             titleColor: '#fff',
             bodyColor: '#fff',
-            borderColor: '#FF1493',
+            borderColor: '#ccc',
             borderWidth: 1,
             cornerRadius: 8,
-            displayColors: false,
-            padding: 12,
-            titleFont: { size: 14 },
-            bodyFont: { size: 16, weight: '600' }
+            displayColors: true,
+            padding: 12
           }
         },
         scales: {
           x: {
             type: 'time',
-            time: {
-              unit: 'month',
-              displayFormats: { month: 'MMM yyyy' }
-            },
-            title: {
-              display: true,
-              text: 'Month',
-              font: { size: 14, weight: 'bold' },
-              color: '#2d1b3d'
-            },
+            time: { unit: 'month', displayFormats: { month: 'MMM yyyy' } },
             grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { color: '#555', font: { size: 12 } }
+            ticks: { color: '#555', font: { size: 11 } }
           },
           y: {
             beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Charge Amount',
-              font: { size: 14, weight: 'bold' },
-              color: '#2d1b3d'
-            },
             grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: {
-              color: '#555',
-              font: { size: 12 },
-              stepSize: 5
-            }
+            ticks: { color: '#555', font: { size: 11 }, stepSize: 5 }
           }
         }
       }
@@ -328,22 +385,18 @@
   }
 
   // ==================================================================
-  // 4. INIT ON LOAD – GUARANTEED
+  // 5. INIT
   // ==================================================================
   window.addEventListener('load', () => {
-    // Small delay to ensure canvas is fully rendered
     setTimeout(() => {
       renderTable();
       renderChart();
 
-      // Auto-open details on desktop
       const details = document.getElementById('table-details');
-      const handleResize = () => {
-        details.open = window.innerWidth > 768;
-      };
-      handleResize();
-      window.addEventListener('resize', handleResize);
-    }, 100);
+      const resize = () => { details.open = window.innerWidth > 768; };
+      resize();
+      window.addEventListener('resize', resize);
+    }, 120);
   });
 </script>
 
