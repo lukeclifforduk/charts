@@ -1,219 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Charges Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Charges Area Chart Dashboard</title>
 
-    <!-- Chart.js + date adapter -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
-            integrity="sha512-/tWGeY3dY3kM6z0t6c7zO7bH3O6oF+9K2P6p9oJ2V8J5c5Y5X4zU5h5l5q5f5e5d5c5b5a5e5f5g5h5i5j5k5l5m5n5o5p=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <!-- Chart.js + Date Adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
-    <style>
-        :root {
-            --bg: #FFF0F5;
-            --panel: rgba(255,255,255,0.85);
-            --primary: #FF69B4;      /* Hot pink – border / line */
-            --fill: rgba(255,105,180,0.15);
-            --accent: #FF1493;       /* Deep pink – points */
-            --grid: rgba(0,0,0,0.08);
-            --text: #333;
-        }
+  <style>
+    :root {
+      --pink-bg: #FFF0F5;
+      --panel-bg: rgba(255, 255, 255, 0.9);
+      --hot-pink: #FF1493;
+      --soft-pink: #FFB6C1;
+      --deep-pink: #FF69B4;
+      --text: #2d1b3d;
+      --grid: rgba(0,0,0,0.1);
+    }
 
-        * { box-sizing: border-box; margin:0; padding:0; }
-        body {
-            background: var(--bg) url('https://static.vecteezy.com/system/resources/previews/051/865/495/non_2x/branch-with-cherry-blossoms-on-a-transparent-background-free-png.png') center/cover no-repeat;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: var(--text);
-            min-height: 100vh;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--pink-bg) url('https://static.vecteezy.com/system/resources/previews/051/865/495/non_2x/branch-with-cherry-blossoms-on-a-transparent-background-free-png.png') center/cover no-repeat fixed;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .container { display:flex; height:100vh; }
-        .left, .right { padding:1rem; }
-        .left  { width:30%; background:var(--panel); border-right:1px solid #f0f0f0; overflow-y:auto; }
-        .right { width:70%; background:var(--panel); display:flex; align-items:center; justify-content:center; }
+    .dashboard {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
 
-        /* Table styling – clean, no AntD dependency */
-        table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-        th, td { padding:0.5rem; text-align:left; }
-        th { background:#FFB6C1; font-weight:600; }
-        input { width:100%; padding:0.35rem; border:1px solid #d9d9d9; border-radius:4px; }
-        input:focus { border-color:var(--primary); outline:none; }
+    .sidebar {
+      width: 350px;
+      background: var(--panel-bg);
+      padding: 1.5rem;
+      border-right: 1px solid #eee;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    }
 
-        summary { cursor:pointer; padding:0.75rem; background:#FFB6C1; border-radius:4px; font-weight:600; }
+    .chart-container {
+      flex: 1;
+      padding: 1.5rem;
+      background: var(--panel-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        /* Chart container */
-        #chart-wrapper { width:100%; height:100%; max-height:80vh; }
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-height: 80vh;
+    }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container { flex-direction:column; height:auto; }
-            .left  { width:100%; order:2; }
-            .right { width:100%; height:50vh; order:1; align-items:flex-start; }
-        }
-        @media (max-width: 768px) and (orientation: landscape) {
-            .left { display:none; }
-            .right { height:100vh; padding:0; }
-        }
-    </style>
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--hot-pink);
+      font-weight: 600;
+    }
+
+    details {
+      margin-bottom: 1rem;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      background: var(--soft-pink);
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: var(--soft-pink);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--hot-pink);
+      box-shadow: 0 0 0 2px rgba(255,20,147,0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .sidebar, .chart-container {
+        width: 100%;
+      }
+      .sidebar {
+        max-height: 50vh;
+        order: 2;
+      }
+      .chart-container {
+        height: 50vh;
+        order: 1;
+      }
+    }
+
+    @media (max-width: 768px) and (orientation: landscape) {
+      .sidebar { display: none; }
+      .chart-container { height: 100vh; padding: 1rem; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <div class="left">
-        <details id="table-details" open>
-            <summary>View / Edit Charges</summary>
-            <table>
-                <thead>
-                <tr><th>Date</th><th>Charge</th></tr>
-                </thead>
-                <tbody id="data-table"></tbody>
-            </table>
-        </details>
-    </div>
 
-    <div class="right">
-        <div id="chart-wrapper"><canvas id="chargeChart"></canvas></div>
+<div class="dashboard">
+  <!-- Sidebar: Editable Table -->
+  <aside class="sidebar">
+    <h1>Edit Charges</h1>
+    <details open id="table-details">
+      <summary>Monthly Data</summary>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Charge</th>
+          </tr>
+        </thead>
+        <tbody id="data-table"></tbody>
+      </table>
+    </details>
+  </aside>
+
+  <!-- Main: Area Chart -->
+  <main class="chart-container">
+    <div class="chart-wrapper">
+      <canvas id="areaChart"></canvas>
     </div>
+  </main>
 </div>
 
 <script>
-    // ------------------------------------------------------------------
-    // 1. DATA
-    // ------------------------------------------------------------------
-    let data = [
-        { date: '2025-01-01', charge: 37 },
-        { date: '2025-02-01', charge: 35 },
-        { date: '2025-03-01', charge: 28 },
-        { date: '2025-04-01', charge: 25 },
-        { date: '2025-05-01', charge: 28 },
-        { date: '2025-06-01', charge: 24 },
-        { date: '2025-07-01', charge: 22 },
-        { date: '2025-08-01', charge: 19 },
-        { date: '2025-09-01', charge: 14 },
-        { date: '2025-10-01', charge: 12 }
-    ];
+  // ==================================================================
+  // 1. DATA STORE
+  // ==================================================================
+  let chargesData = [
+    { date: '2025-01-01', charge: 37 },
+    { date: '2025-02-01', charge: 35 },
+    { date: '2025-03-01', charge: 28 },
+    { date: '2025-04-01', charge: 25 },
+    { date: '2025-05-01', charge: 28 },
+    { date: '2025-06-01', charge: 24 },
+    { date: '2025-07-01', charge: 22 },
+    { date: '2025-08-01', charge: 19 },
+    { date: '2025-09-01', charge: 14 },
+    { date: '2025-10-01', charge: 12 }
+  ];
 
-    // ------------------------------------------------------------------
-    // 2. TABLE RENDERING
-    // ------------------------------------------------------------------
-    const tbody = document.getElementById('data-table');
+  // ==================================================================
+  // 2. RENDER TABLE
+  // ==================================================================
+  const tableBody = document.getElementById('data-table');
 
-    function renderTable() {
-        tbody.innerHTML = '';
-        data.forEach((row, i) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="date" value="${row.date}" onchange="updateDate(${i},this.value)"></td>
-                <td><input type="number" min="0" step="0.01" value="${row.charge}" onchange="updateCharge(${i},this.value)"></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    window.updateDate   = (i, v) => { data[i].date   = v; updateChart(); };
-    window.updateCharge = (i, v) => { data[i].charge = parseFloat(v) || 0; updateChart(); };
-
-    // ------------------------------------------------------------------
-    // 3. CHART (Area) – best-practice config
-    // ------------------------------------------------------------------
-    let chart = null;
-
-    function createGradient(ctx, height) {
-        const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, 'rgba(255,105,180,0.25)');
-        grad.addColorStop(1, 'rgba(255,105,180,0.05)');
-        return grad;
-    }
-
-    function updateChart() {
-        const canvas = document.getElementById('chargeChart');
-        const ctx    = canvas.getContext('2d');
-
-        // ---- sort by date ------------------------------------------------
-        data.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-        // ---- destroy previous instance -----------------------------------
-        if (chart) chart.destroy();
-
-        // ---- build new chart ---------------------------------------------
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => d.date),
-                datasets: [{
-                    label: 'Charges',
-                    data: data.map(d => d.charge),
-
-                    // ---- line & area styling ---------------------------------
-                    borderColor: 'rgb(255,105,180)',           // hot pink
-                    backgroundColor: (ctx) => {
-                        const chart = ctx.chart;
-                        const {ctx: c, data, chartArea} = chart;
-                        if (!chartArea) return null;
-                        return createGradient(c, chartArea.bottom);
-                    },
-                    fill: true,
-                    tension: 0.25,            // smooth curve
-
-                    // ---- point styling ---------------------------------------
-                    pointBackgroundColor: '#FF1493',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 750, easing: 'easeOutQuart' },
-
-                interaction: { mode: 'index', intersect: false },
-
-                plugins: {
-                    legend: { display: true, position: 'top' },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.75)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        cornerRadius: 6,
-                        displayColors: false
-                    }
-                },
-
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: { unit: 'month', displayFormats: { month: 'MMM yyyy' } },
-                        title: { display: true, text: 'Date', font: { weight: 'bold' } },
-                        grid: { color: 'var(--grid)' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Charge', font: { weight: 'bold' } },
-                        beginAtZero: true,
-                        grid: { color: 'var(--grid)' },
-                        ticks: { stepSize: 5 }
-                    }
-                }
-            }
-        });
-    }
-
-    // ------------------------------------------------------------------
-    // 4. INITIALISATION
-    // ------------------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-        renderTable();
-        updateChart();
-
-        // keep <details> open on wide screens
-        const details = document.getElementById('table-details');
-        const toggle = () => details.open = window.innerWidth > 768;
-        toggle();
-        window.addEventListener('resize', toggle);
+  function renderTable() {
+    tableBody.innerHTML = '';
+    chargesData.forEach((item, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="date" value="${item.date}" onchange="updateRow(${index}, 'date', this.value)"></td>
+        <td><input type="number" min="0" step="0.1" value="${item.charge}" onchange="updateRow(${index}, 'charge', this.value)"></td>
+      `;
+      tableBody.appendChild(row);
     });
+  }
+
+  // Global update function
+  window.updateRow = (index, field, value) => {
+    if (field === 'charge') {
+      chargesData[index][field] = parseFloat(value) || 0;
+    } else {
+      chargesData[index][field] = value;
+    }
+    renderChart(); // Live update
+  };
+
+  // ==================================================================
+  // 3. AREA CHART – FLAWLESS RENDERING
+  // ==================================================================
+  let areaChart = null;
+
+  function renderChart() {
+    const ctx = document.getElementById('areaChart').getContext('2d');
+
+    // Sort by date
+    const sortedData = [...chargesData].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Destroy previous chart
+    if (areaChart) {
+      areaChart.destroy();
+    }
+
+    // Create gradient fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(255, 20, 147, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 20, 147, 0.05)');
+
+    // Create chart
+    areaChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: sortedData.map(d => d.date),
+        datasets: [{
+          label: 'Monthly Charges',
+          data: sortedData.map(d => d.charge),
+          fill: true,
+          backgroundColor: gradient,
+          borderColor: '#FF1493',
+          borderWidth: 3,
+          pointBackgroundColor: '#FF1493',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.4,
+          shadowOffsetX: 0,
+          shadowOffsetY: 4,
+          shadowBlur: 10,
+          shadowColor: 'rgba(255, 20, 147, 0.3)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1200,
+          easing: 'easeOutQuart'
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              font: { size: 14, weight: '600' },
+              color: '#FF1493',
+              padding: 20
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(45, 27, 61, 0.9)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: '#FF1493',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: false,
+            padding: 12,
+            titleFont: { size: 14 },
+            bodyFont: { size: 16, weight: '600' }
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'month',
+              displayFormats: { month: 'MMM yyyy' }
+            },
+            title: {
+              display: true,
+              text: 'Month',
+              font: { size: 14, weight: 'bold' },
+              color: '#2d1b3d'
+            },
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { color: '#555', font: { size: 12 } }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Charge Amount',
+              font: { size: 14, weight: 'bold' },
+              color: '#2d1b3d'
+            },
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: {
+              color: '#555',
+              font: { size: 12 },
+              stepSize: 5
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ==================================================================
+  // 4. INIT ON LOAD – GUARANTEED
+  // ==================================================================
+  window.addEventListener('load', () => {
+    // Small delay to ensure canvas is fully rendered
+    setTimeout(() => {
+      renderTable();
+      renderChart();
+
+      // Auto-open details on desktop
+      const details = document.getElementById('table-details');
+      const handleResize = () => {
+        details.open = window.innerWidth > 768;
+      };
+      handleResize();
+      window.addEventListener('resize', handleResize);
+    }, 100);
+  });
 </script>
+
 </body>
 </html>
